@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COVID Prediction App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      background-color: #f4f6f9;
+    }
+    .upload-card {
+      margin: 5rem auto;
+      padding: 3rem;
+      max-width: 600px;
+      background-color: #ffffff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .btn-success {
+      width: 100%;
+    }
+    #predictionResult {
+      margin-top: 2rem;
+      font-size: 1.25rem;
+      text-align: center;
+    }
+    #previewImage {
+      display: none;
+      max-height: 300px;
+      margin: 1.5rem auto;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">COVID App</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/index">Predict</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="upload-card">
+      <h2 class="mb-4 text-center">Upload Chest X-Ray</h2>
+      <input type="file" id="fileInput" class="form-control mb-3">
+      <img id="previewImage" src="#" alt="Uploaded Image Preview" class="img-fluid" />
+      <button class="btn btn-success" onclick="uploadAndPredict()">Predict</button>
+      <div id="predictionResult"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function uploadAndPredict() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      // Display image preview
+      const preview = document.getElementById('previewImage');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+      document.getElementById("predictionResult").innerHTML = `
+        <h4 class="text-primary">Prediction: ${result.label}</h4>
+        <p class="text-muted">Confidence: ${result.confidence.toFixed(2)}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
