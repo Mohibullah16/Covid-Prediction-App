@@ -1,7 +1,3 @@
-Here's a **stylish and professional `README.md`** for your **COVID-19 X-ray Classification FastAPI Web App**, including details about the dataset, setup, usage, and deployment:
-
----
-
 ```markdown
 # 🦠 COVID-19 X-ray Classification Web App 🔬
 
