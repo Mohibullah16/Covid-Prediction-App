@@ -59,8 +59,8 @@ Covid App/
 
 ## python version 3.11 is required
 ```bash
-git clone https://github.com/Mohammad-Sofyan-Abdullah/ML-BDA-Project.git
-cd ML-BDA-Project
+git clone https://github.com/Mohammad-Sofyan-Abdullah/Covid-Prediction-App.git
+cd Covid-Prediction-App
 ````
 
 
