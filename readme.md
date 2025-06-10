@@ -1,4 +1,3 @@
-```markdown
 # 🦠 COVID-19 X-ray Classification Web App 🔬
 
 > An AI-powered web application to predict COVID-19 status from chest X-ray images using a trained MobileNetV2 model, powered by FastAPI and deployed on AWS EC2.
@@ -29,12 +28,12 @@
 
 ## 🛠️ Tech Stack
 
-| Layer       | Technology                  |
+| Layer       | Technology                   |
 |-------------|------------------------------|
-| Backend     | Python, FastAPI, TensorFlow |
-| Frontend    | HTML/CSS + Jinja Templates  |
-| Model       | MobileNetV2 (.keras format) |
-| Deployment  | Docker, AWS EC2             |
+| Backend     | Python, FastAPI, TensorFlow  |
+| Frontend    | HTML/CSS + Jinja Templates   |
+| Model       | MobileNetV2 (.keras format)  |
+| Deployment  | Docker, AWS EC2              |
 
 ---
 
