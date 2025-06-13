@@ -1,100 +1,254 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>COVID Prediction App</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css">
-  <style>
-    body {
-      background-color: #f4f6f9;
-    }
-    .upload-card {
-      margin: 5rem auto;
-      padding: 3rem;
-      max-width: 600px;
-      background-color: #ffffff;
-      border-radius: 1rem;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    .btn-success {
-      width: 100%;
-    }
-    #predictionResult {
-      margin-top: 2rem;
-      font-size: 1.25rem;
-      text-align: center;
-    }
-    #previewImage {
-      display: none;
-      max-height: 300px;
-      margin: 1.5rem auto;
-      display: block;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID Prediction App</title>
+    
+    <!-- Bootstrap CSS for responsive utilities and base components -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        /* --- General Body Styles --- */
+        body {
+            /* Dark, sleek gradient background consistent with the landing page */
+            background: linear-gradient(to right, #232526, #414345);
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Allow content to flow vertically */
+            justify-content: flex-start; /* Start content from the top */
+            align-items: center; /* Center items horizontally */
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            color: #f0f0f0; /* Default light text color */
+            margin: 0; /* Remove default body margin */
+            padding-top: 70px; /* Space for fixed navbar */
+        }
+
+        /* --- Navbar Styles (Enhancements for Dark Theme) --- */
+        .navbar {
+            background-color: #2a2d30 !important; /* Darker background for navbar */
+            border-bottom: 1px solid #555; /* Subtle separator */
+            position: fixed; /* Keep navbar at the top */
+            width: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Ensure navbar stays on top */
+        }
+        .navbar-brand, .nav-link {
+            color: #ffffff !important; /* White text for links */
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #00adb5 !important; /* Highlight on hover */
+        }
+
+        /* --- Upload Card Container --- */
+        .upload-card {
+            /* Consistent styling with the landing page's welcome box */
+            background-color: #2a2d30;
+            padding: 3rem 4rem;
+            border-radius: 0.5rem;
+            border: 1px solid #555;
+            text-align: center;
+            transition: all 0.3s ease;
+            width: 90%; /* Responsive width */
+            max-width: 600px; /* Max width for larger screens */
+            margin: 3rem auto; /* Adjust margin for spacing below navbar */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Stronger shadow for depth */
+        }
+        @media (max-width: 768px) {
+            .upload-card {
+                padding: 2rem; /* Reduce padding on smaller screens */
+            }
+        }
+
+        /* --- Heading Style for Upload Card --- */
+        .upload-card h2 {
+            color: #ffffff; /* White text for heading */
+            margin-bottom: 2.5rem;
+            font-weight: 300; /* Lighter font weight */
+            font-size: 2.5rem; /* Slightly smaller than landing page h1 */
+            letter-spacing: 0.8px;
+        }
+
+        /* --- File Input Style --- */
+        .form-control {
+            background-color: #3f4448; /* Darker input background */
+            color: #f0f0f0; /* Light text color */
+            border: 1px solid #555;
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        .form-control::file-selector-button {
+            background-color: #00adb5;
+            color: #222831;
+            border: none;
+            padding: 0.75rem 1rem;
+            margin-right: 1rem;
+            border-radius: 0.2rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .form-control::file-selector-button:hover {
+            background-color: #ffffff;
+            color: #00adb5;
+        }
+
+        /* --- Predict Button Style (Consistent with Landing Page Button) --- */
+        .btn-success {
+            background-color: #00adb5;
+            color: #222831;
+            padding: 0.8rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 50px; /* Pill shape */
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%; /* Ensure it spans full width as before */
+        }
+        .btn-success:hover {
+            background-color: #ffffff;
+            color: #00adb5;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 173, 181, 0.4);
+        }
+
+        /* --- Prediction Result Display --- */
+        #predictionResult {
+            margin-top: 2rem;
+            font-size: 1.25rem;
+            text-align: center;
+            color: #f0f0f0; /* Light text for results */
+        }
+        #predictionResult h4 {
+            color: #00adb5; /* Highlight prediction label */
+            font-weight: 600;
+        }
+        #predictionResult p {
+            color: #ffffff; /* Slightly subdued for confidence */
+        }
+
+        /* --- Image Preview --- */
+        #previewImage {
+            display: none; /* Hidden by default, shown via JS */
+            max-height: 300px;
+            width: auto; /* Maintain aspect ratio */
+            border-radius: 0.5rem;
+            margin: 1.5rem auto;
+            border: 1px solid #555;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- New Placeholder Image Style --- */
+        .placeholder-image {
+            max-width: 150px; /* Set a max width for the icon */
+            height: auto;
+            margin-bottom: 2rem; /* Space below the image */
+            opacity: 0.7; /* Slightly faded */
+        }
+
+
+    </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">COVID App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/index">Predict</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">About Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
     <div class="container">
-      <a class="navbar-brand" href="/">COVID App</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/index">Predict</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/about">About Us</a>
-          </li>
-        </ul>
-      </div>
+        <div class="upload-card">
+            <!-- Placeholder Image for visual appeal -->
+            <img src="https://placehold.co/150x150/00adb5/222831?text=X-RAY" alt="X-Ray Icon" class="img-fluid placeholder-image" />
+            
+            <h2 class="mb-4 text-center">Upload Chest X-Ray for Prediction</h2>
+            <input type="file" id="fileInput" class="form-control mb-3" accept="image/*">
+            <img id="previewImage" src="#" alt="Uploaded Image Preview" class="img-fluid" />
+            <button class="btn btn-success" onclick="uploadAndPredict()">Predict</button>
+            <div id="predictionResult"></div>
+        </div>
     </div>
-  </nav>
 
-  <div class="container">
-    <div class="upload-card">
-      <h2 class="mb-4 text-center">Upload Chest X-Ray</h2>
-      <input type="file" id="fileInput" class="form-control mb-3">
-      <img id="previewImage" src="#" alt="Uploaded Image Preview" class="img-fluid" />
-      <button class="btn btn-success" onclick="uploadAndPredict()">Predict</button>
-      <div id="predictionResult"></div>
-    </div>
-  </div>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        /**
+         * Asynchronously handles the file upload and prediction process.
+         * Displays a preview of the selected image and then sends the image
+         * to the server for a COVID prediction, displaying the result.
+         */
+        async function uploadAndPredict() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    async function uploadAndPredict() {
-      const fileInput = document.getElementById('fileInput');
-      const file = fileInput.files[0];
+            // If no file is selected, exit the function.
+            if (!file) {
+                document.getElementById("predictionResult").innerHTML = '<p class="text-warning">Please select an image file.</p>';
+                return;
+            }
 
-      if (!file) return;
+            // Display image preview
+            const preview = document.getElementById('previewImage');
+            preview.src = URL.createObjectURL(file); // Create a URL for the image file
+            preview.style.display = 'block'; // Make the image visible
 
-      // Display image preview
-      const preview = document.getElementById('previewImage');
-      preview.src = URL.createObjectURL(file);
-      preview.style.display = 'block';
+            // Prepare form data for sending the file
+            const formData = new FormData();
+            formData.append("file", file);
 
-      const formData = new FormData();
-      formData.append("file", file);
+            // Display a loading message
+            document.getElementById("predictionResult").innerHTML = '<p class="text-info">Predicting... Please wait.</p>';
 
-      const response = await fetch("/predict", {
-        method: "POST",
-        body: formData
-      });
+            try {
+              // Send the image to the /predict endpoint
+              const response = await fetch("/predict", {
+              method: "POST",
+              body: formData
+              });
 
-      const result = await response.json();
-      document.getElementById("predictionResult").innerHTML = `
-        <h4 class="text-primary">Prediction: ${result.label}</h4>
-        <p class="text-muted">Confidence: ${result.confidence.toFixed(2)}</p>
-      `;
-    }
-  </script>
+              // Check if the response was successful
+              if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+              }
+
+              const result = await response.json(); // Parse the JSON response
+              
+              // Display the prediction result
+              document.getElementById("predictionResult").innerHTML = `
+              <h4 style="color: white;">Prediction: ${result.label}</h4>
+              <p style="color: white;">Confidence: ${result.confidence.toFixed(2)}</p>
+              `;
+            } catch (error) {
+                console.error("Error during prediction:", error);
+                document.getElementById("predictionResult").innerHTML = `
+                    <p class="text-danger">Error: Could not get prediction. Please try again.</p>
+                `;
+            }
+        }
+    </script>
 </body>
 </html>

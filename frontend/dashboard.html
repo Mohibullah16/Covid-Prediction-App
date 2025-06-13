@@ -1,87 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard | COVID App</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-  <style>
-    body {
-      background: #f5f8fa;
-    }
-    .card {
-      border: none;
-      border-radius: 1rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease;
-      text-align: center;
-      padding: 2rem;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-    }
-    .card i {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-    .stats-value {
-      font-size: 2.5rem;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-    <div class="container">
-      <a class="navbar-brand" href="/">COVID App</a>
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="/index">Predict</a></li>
-        <li class="nav-item"><a class="nav-link" href="/about">About Us</a></li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="container py-5">
-    <div class="row g-4 justify-content-center">
-      <div class="col-md-4">
-        <div class="card bg-primary text-white">
-          <i class="bi bi-bar-chart-line-fill"></i>
-          <h5>Total Predictions</h5>
-          <div id="totalCount" class="stats-value">--</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-success text-white">
-          <i class="bi bi-emoji-smile-fill"></i>
-          <h5>Negative</h5>
-          <div id="negativeCount" class="stats-value">--</div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card bg-danger text-white">
-          <i class="bi bi-emoji-frown-fill"></i>
-          <h5>Positive</h5>
-          <div id="positiveCount" class="stats-value">--</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    async function loadStats() {
-      try {
-        const response = await fetch("/stats");
-        const stats = await response.json();
-
-        document.getElementById("totalCount").textContent = stats.total;
-        document.getElementById("positiveCount").textContent = stats.positive;
-        document.getElementById("negativeCount").textContent = stats.negative;
-      } catch (error) {
-        console.error("Failed to load stats:", error);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | COVID App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        /* Dark, sleek gradient background consistent with the landing page */
+        background: linear-gradient(to right, #232526, #414345);
+        height: 100vh;
+        display: flex;
+        flex-direction: column; /* Allow content to flow vertically */
+        justify-content: flex-start; /* Start content from the top */
+        align-items: center; /* Center items horizontally */
+        font-family: "Segoe UI", "Roboto", "Helvetica Neue", Arial, sans-serif;
+        color: #f0f0f0; /* Default light text color */
+        margin: 0; /* Remove default body margin */
+        padding-top: 70px; /* Space for fixed navbar */
       }
-    }
-    window.onload = loadStats;
-  </script>
-</body>
+
+      /* --- Navbar Styles (Enhancements for Dark Theme) --- */
+      .navbar {
+        background-color: #2a2d30 !important; /* Darker background for navbar */
+        border-bottom: 1px solid #555; /* Subtle separator */
+        position: fixed; /* Keep navbar at the top */
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1000; /* Ensure navbar stays on top */
+      }
+      .navbar-brand,
+      .nav-link {
+        color: #ffffff !important; /* White text for links */
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+      .nav-link:hover {
+        color: #00adb5 !important; /* Highlight on hover */
+      }
+      .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+        text-align: center;
+        padding: 2rem;
+      }
+      .card:hover {
+        transform: translateY(-5px);
+      }
+      .card i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+      .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+      }
+      #statsChart {
+        max-width: 1200px;
+        margin: 3rem auto;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+      <div class="container">
+        <a class="navbar-brand" href="/">COVID App</a>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/index">Predict</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About Us</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container py-5">
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-4">
+          <div class="card bg-primary text-white">
+            <i class="bi bi-bar-chart-line-fill"></i>
+            <h5>Total Predictions</h5>
+            <div id="totalCount" class="stats-value">--</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-success text-white">
+            <i class="bi bi-emoji-smile-fill"></i>
+            <h5>Negative</h5>
+            <div id="negativeCount" class="stats-value">--</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card bg-danger text-white">
+            <i class="bi bi-emoji-frown-fill"></i>
+            <h5>Positive</h5>
+            <div id="positiveCount" class="stats-value">--</div>
+          </div>
+        </div>
+      </div>
+
+      <canvas id="statsChart" style="height: 300px; width: 600px"></canvas>
+    </div>
+
+    <script>
+      async function loadStats() {
+        try {
+          const response = await fetch("/stats");
+          const stats = await response.json();
+
+          // Update stat cards
+          document.getElementById("totalCount").textContent = stats.total;
+          document.getElementById("positiveCount").textContent = stats.positive;
+          document.getElementById("negativeCount").textContent = stats.negative;
+
+          // Bar Chart
+          const ctx = document.getElementById("statsChart").getContext("2d");
+          new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: ["Total", "Positive", "Negative"],
+              datasets: [
+                {
+                  label: "COVID Prediction Stats",
+                  data: [stats.total, stats.positive, stats.negative],
+                  backgroundColor: ["#0d6efd", "#dc3545", "#198754"],
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { display: false },
+                title: {
+                  display: true,
+                  text: "COVID Prediction Breakdown",
+                  color: "#ffffff",
+                },
+              },
+              scales: {
+                x: {
+                  ticks: {
+                    color: "#dadad9",
+                  },
+                  grid: {
+                    color: "#dadad9", // Solid white lines
+                    lineWidth: 2, // Make grid lines bold
+                  },
+                },
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    precision: 0,
+                    color: "#dadad9",
+                  },
+                  grid: {
+                    color: "#afafaf", // Solid white lines
+                    lineWidth: 1, // Make grid lines bold
+                  },
+                },
+              },
+            },
+          });
+        } catch (error) {
+          console.error("Failed to load stats:", error);
+        }
+      }
+
+      window.onload = loadStats;
+    </script>
+  </body>
 </html>
